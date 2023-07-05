@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package universidad.estructuras.conjuntistas;
+package universidad.estructuras.grafo;
 import universidad.estructuras.dinamica.Lista;
 
 /**
