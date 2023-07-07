@@ -5,6 +5,7 @@
  */
 package universidad.estructuras.grafo;
 import universidad.estructuras.dinamica.Lista;
+import universidad.estructuras.dinamica.Cola;
 
 /**
  *
@@ -12,6 +13,10 @@ import universidad.estructuras.dinamica.Lista;
  */
 public class Grafo {
     private NodoVert inicio;
+    
+    public Grafo(){
+        this.inicio=null;
+    }
     
     
     
@@ -78,9 +83,7 @@ public class Grafo {
          }
         return exito;
     }
-    private boolean eliminarVerticeAux(NodoVert verticeAEliminar){
-        
-         NodoVert verticeQueElimino= this.ubicarVertice(verticeAEliminar);
+    private boolean eliminarVerticeAux(NodoVert verticeQueElimino){
         
             //primero, elimino todos los arcos
             NodoAdy primerAdy= verticeQueElimino.getPrimerAdy();
@@ -176,30 +179,44 @@ public class Grafo {
   }
   private boolean insertarArcoAux(NodoVert origen, NodoVert destino,Object etiqueta ){
       //Metodo privado que inseta un arco dos nodos
-      //Devuelve true unicamente si no existe previamente un arco entre ambos
-      boolean exito=false;
-      
-      //verifico que no haya un arco entre ambos
-      if(!existeArcoAux(origen,destino)){
-          //primero lo inserto al final del nodo origen, junto con la etiqueta
-          NodoAdy temp= origen.getPrimerAdy();
-          while(temp.getSigAdyacente()!=null){
-              temp=temp.getSigAdyacente();
-          }
-          temp.setSigAdyacente(new NodoAdy(destino, null, etiqueta));
-          
-          
-          //y ahora hago lo mismo con el destino
-          temp= destino.getPrimerAdy();
-          while(temp.getSigAdyacente()!=null){
-              temp=temp.getSigAdyacente();
-          }
-          temp.setSigAdyacente(new NodoAdy(origen, null, etiqueta));
-          
-          exito=true;
-       }
+      //Devuelve false unicamente si ya existia un arco entre ambos nodos
+          boolean exito = false;
+
+    if (!existeArcoAux(origen, destino)) {
+        NodoAdy temp = origen.getPrimerAdy();
+        if (temp == null)
+            // Si es el primer arco que agrego
+            origen.setPrimerAdy(new NodoAdy(destino, null, etiqueta));
+        else {
+            // voy hasta el ultimo nodo para agregar el arco al final
+            while (temp.getSigAdyacente() != null) {
+                temp = temp.getSigAdyacente();
+            }
+
+            // lo agrego
+            temp.setSigAdyacente(new NodoAdy(destino, null, etiqueta));
+        }
+
+        //ahora agrego el arco a la inversa
+        temp = destino.getPrimerAdy();
+        if (temp == null)
+            //Si es el primer arco que agrego
+            destino.setPrimerAdy(new NodoAdy(origen, null, etiqueta));
+        else {
+            // sino, voy hasta el final
+            while (temp.getSigAdyacente() != null) {
+                temp = temp.getSigAdyacente();
+            }
+
+            // Agrego el arco
+            temp.setSigAdyacente(new NodoAdy(origen, null, etiqueta));
+        }
+
+        exito = true;
+    }
+
     return exito;
-  }
+}
   
   
   public boolean existeArco(Object origen, Object destino){
@@ -216,6 +233,7 @@ public class Grafo {
       
       if(nodoOrigen!=null && nodoDestino!=null){
           encontrado=existeArcoAux(nodoOrigen, nodoDestino);
+          encontrado=existeArcoAux(nodoDestino,nodoOrigen);
       }
       return encontrado;
   }
@@ -307,6 +325,66 @@ public boolean esVacio(){
     }
     return exito;
 }
+
+
+ public void vaciar() {
+        this.inicio = null;
+    }
+ 
+ public String toString() {
+        String grafo = "";
+        NodoVert aux = this.inicio;
+        while (aux != null) {
+            grafo += "VERTICE: \n\t"+ aux.getElem()+"\n";
+            NodoAdy auxArco = aux.getPrimerAdy();
+            grafo += "ADYACENTE: " + "\n\t";
+            while (auxArco != null) {
+                grafo += auxArco.getVertice().getElem();
+                grafo += "\tETIQUETA: "+auxArco.getEtiqueta();
+                auxArco = auxArco.getSigAdyacente();
+                if (auxArco != null) {
+                    grafo += "\n\t";
+                }
+            }
+            grafo += "\n";
+            aux = aux.getSigVertice();
+        }
+        return grafo;
+    }
+ 
+  public Lista listarAnchura(Object dondeEmpieza){
+      Lista visitados= new Lista();
+      
+      NodoVert temp=this.inicio;
+      while(temp!=null){
+          if((visitados.localizar(temp.getElem())<0))
+              anchuraDesde(temp,visitados);
+          
+      }
+      return visitados;
+  }
+  private Lista anchuraDesde(NodoVert inicio, Lista vis){
+      Cola q= new Cola();
+      vis.insertar(inicio.getElem(), vis.longitud()+1);
+      q.poner(inicio);
+      
+      while(!q.esVacia()){
+          NodoVert u= (NodoVert) q.obtenerFrente();
+          q.sacar();
+          NodoAdy temp= u.getPrimerAdy();
+          
+          while(temp!=null){
+              if((vis.localizar(temp.getVertice().getElem())<0)){
+                  vis.insertar(temp.getVertice().getElem(), vis.longitud()+1);
+                  q.poner(temp.getVertice());
+              }
+              temp=temp.getSigAdyacente();
+          }
+              
+      }
+      return vis;
+  }
+
 }
 
         
